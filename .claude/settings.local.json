@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run dev:*)",
+      "Bash(rm:*)",
+      "Bash(npm install:*)",
+      "mcp__ide__getDiagnostics",
+      "Read(//c/Users/NR2201ZE/Downloads/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
