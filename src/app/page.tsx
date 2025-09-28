@@ -1,78 +1,59 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useEffect, useState } from 'react';
+import LoadingScreen from '@/components/ui/LoadingScreen';
+import Opening from '@/components/chapters/Opening';
+import Disconnection from '@/components/chapters/Disconnection';
+import TheRevolution from '@/components/chapters/TheRevolution';
+import Vision from '@/components/chapters/Vision';
 
-// Components
-import ErrorBoundary from '@/components/ErrorBoundary';
-import LoadingScreen from '@/components/LoadingScreen';
-import Header from '@/components/Header';
-import HeroSection from '@/components/HeroSection';
-import ProblemSolutionSection from '@/components/ProblemSolutionSection';
-import ProfileSection from '@/components/ProfileSection';
-import NarrativeCarousel from '@/components/NarrativeCarousel';
-import ImpactCalculator from '@/components/ImpactCalculator';
-import CTASection from '@/components/CTASection';
-
-// Register GSAP plugins
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
+declare global {
+  interface Window {
+    gsap: any;
+    ScrollTrigger: any;
+    ScrollToPlugin: any;
+    lucide: any;
+  }
 }
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Add loading class to body
-    document.body.classList.add('loading');
+    // Show main content after a delay, regardless of GSAP loading
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
 
-    return () => {
-      // Clean up ScrollTriggers on unmount
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
+      // Initialize GSAP if available
+      if (typeof window !== 'undefined' && window.gsap) {
+        window.gsap.registerPlugin(window.ScrollTrigger, window.ScrollToPlugin);
+      }
+
+      // Initialize Lucide icons if available
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  const handleLoadingComplete = () => {
-    setIsLoading(false);
-    document.body.classList.remove('loading');
-
-    // Set up main content visibility animation
-    gsap.set('#main-content', { autoAlpha: 0 });
-
-    ScrollTrigger.create({
-      trigger: '#hero-section',
-      start: 'top top',
-      onEnter: () => {
-        gsap.to('#main-content', { autoAlpha: 1, duration: 0.5 });
-      },
-      onLeaveBack: () => {
-        gsap.to('#main-content', { autoAlpha: 0, duration: 0.5 });
-      }
-    });
-  };
-
   return (
-    <ErrorBoundary>
-      {isLoading && <LoadingScreen onComplete={handleLoadingComplete} />}
+    <>
+      <LoadingScreen />
 
-      <Header />
+      <main className={`relative transition-opacity duration-1000 ${
+        isLoaded ? 'opacity-100' : 'opacity-0'
+      }`}>
+        {/* Chapitre 0 - Ouverture */}
+        <Opening />
 
-      <HeroSection />
+        {/* Chapitre 1 - La Déconnexion */}
+        <Disconnection />
 
-      <main id="main-content" className="relative z-10">
-        <ProblemSolutionSection />
-        <ProfileSection />
-        <NarrativeCarousel />
-        <ImpactCalculator />
-        <CTASection />
+        {/* Chapitre 2 - La Révolution */}
+        <TheRevolution />
       </main>
-
-      <footer className="bg-foret py-12 text-creme/70">
-        <div className="container mx-auto text-center">
-          <p>&copy; 2024 Whatsclose. Révolutionner le commerce local.</p>
-        </div>
-      </footer>
-    </ErrorBoundary>
+    </>
   );
 }

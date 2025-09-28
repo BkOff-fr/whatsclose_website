@@ -1,28 +1,31 @@
-'use client';
+import { useEffect, useState } from 'react';
 
-import { useState, useEffect } from 'react';
-
-export function useReducedMotion(): boolean {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(false);
+export function useReducedMotion() {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    const mediaQueryList = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQueryList.matches);
 
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mediaQuery.matches);
-
-    const handleChange = (event: MediaQueryListEvent) => {
+    const listener = (event: MediaQueryListEvent) => {
       setPrefersReducedMotion(event.matches);
     };
 
-    mediaQuery.addEventListener('change', handleChange);
+    if (mediaQueryList.addEventListener) {
+      mediaQueryList.addEventListener('change', listener);
+    } else {
+      // Fallback for older browsers
+      mediaQueryList.addListener(listener);
+    }
 
     return () => {
-      mediaQuery.removeEventListener('change', handleChange);
+      if (mediaQueryList.removeEventListener) {
+        mediaQueryList.removeEventListener('change', listener);
+      } else {
+        mediaQueryList.removeListener(listener);
+      }
     };
   }, []);
 
   return prefersReducedMotion;
 }
-
-export default useReducedMotion;
